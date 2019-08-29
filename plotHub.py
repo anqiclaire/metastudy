@@ -157,7 +157,7 @@ def getSaver():
     # x_train, y_train, x_valid, y_valid = load_data(mode='train', times = t, prop = prop, bg = bg)
     # Hyper-parameters
     logs_path = "./logs"  # path to the folder that we want to save the logs for Tensorboard
-    lr = 0.001  # The optimization initial learning rate
+    lr = 0.0015  # The optimization initial learning rate
     epochs = 50  # Total number of training epochs
     batch_size = 10 # Training batch size
     display_freq = 500  # Frequency of displaying the training results
@@ -191,14 +191,14 @@ def getSaver():
     # # -----------------------------original version
     # conv1-1 pool 1-1
     # output size 
-    conv1_1 = conv_layer(x, filter_size1_1, num_filters1_1, stride1, name='conv1_1')
-    # output size 
-    pool1_1 = max_pool(conv1_1, ksize=2, stride=1, name='pool1_1')
+    # conv1_1 = conv_layer(x, filter_size1_1, num_filters1_1, stride1, name='conv1_1')
+    # # output size 
+    # pool1_1 = max_pool(conv1_1, ksize=2, stride=1, name='pool1_1')
     # conv1-1 pool 1-2
     # output size 
-    # conv1_2 = conv_layer(x, filter_size1_2, num_filters1_2, stride1, name='conv1_2')
-    # # output size 
-    # pool1_2 = max_pool(conv1_2, ksize=2, stride=1, name='pool1_2')
+    conv1_2 = conv_layer(x, filter_size1_2, num_filters1_2, stride1, name='conv1_2')
+    # output size 
+    pool1_2 = max_pool(conv1_2, ksize=2, stride=1, name='pool1_2')
     # conv1-1 pool 1-3
     # # output size 
     # conv1_3 = conv_layer(x, filter_size1_3, num_filters1_3, stride1, name='conv1_3')
@@ -209,7 +209,7 @@ def getSaver():
     # conv1_4 = conv_layer(x, filter_size1_4, num_filters1_4, stride1, name='conv1_4')
     # # output size
     # pool1_4 = max_pool(conv1_4, ksize=2, stride=1, name='pool1_4')
-    pool1 = pool1_1
+    pool1 = pool1_2
     # conv2 = conv_layer(pool1, filter_size2, num_filters2, stride2, name='conv2')
     # pool2 = max_pool(conv2, ksize=2, stride=2, name='pool2')
     layer_flat = flatten_layer(pool1)
