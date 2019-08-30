@@ -148,8 +148,8 @@ def findEpoch(logs_path):
 def getSaver():
     bg = 7 # bandgap
     prop = 'PSV_bg' # choose the bandgap type
-    t = 4 # times
-    img_h = img_w = 10 * t  # images are 10x10
+    t = 2 # times
+    img_h = img_w = 20 * t  # images are 10x10
     img_size_flat = img_h * img_w  # 10x10=100, the total number of pixels
     n_classes = 2  # Number of classes
     n_channels = 1
@@ -157,8 +157,8 @@ def getSaver():
     # x_train, y_train, x_valid, y_valid = load_data(mode='train', times = t, prop = prop, bg = bg)
     # Hyper-parameters
     logs_path = "./logs"  # path to the folder that we want to save the logs for Tensorboard
-    lr = 0.001  # The optimization initial learning rate
-    epochs = 50  # Total number of training epochs
+    lr = 0.0015  # The optimization initial learning rate
+    epochs = 25  # Total number of training epochs
     batch_size = 10 # Training batch size
     display_freq = 500  # Frequency of displaying the training results
     # 1st convolutional layer
@@ -196,20 +196,20 @@ def getSaver():
     pool1_1 = max_pool(conv1_1, ksize=2, stride=1, name='pool1_1')
     # conv1-1 pool 1-2
     # output size 
-    # conv1_2 = conv_layer(x, filter_size1_2, num_filters1_2, stride1, name='conv1_2')
-    # # output size 
-    # pool1_2 = max_pool(conv1_2, ksize=2, stride=1, name='pool1_2')
+    conv1_2 = conv_layer(x, filter_size1_2, num_filters1_2, stride1, name='conv1_2')
+    # output size 
+    pool1_2 = max_pool(conv1_2, ksize=2, stride=1, name='pool1_2')
     # conv1-1 pool 1-3
     # # output size 
-    # conv1_3 = conv_layer(x, filter_size1_3, num_filters1_3, stride1, name='conv1_3')
-    # # output size
-    # pool1_3 = max_pool(conv1_3, ksize=2, stride=1, name='pool1_3')
-    # # conv1-1 pool 1-1
-    # # output size
-    # conv1_4 = conv_layer(x, filter_size1_4, num_filters1_4, stride1, name='conv1_4')
-    # # output size
-    # pool1_4 = max_pool(conv1_4, ksize=2, stride=1, name='pool1_4')
-    pool1 = pool1_1
+    conv1_3 = conv_layer(x, filter_size1_3, num_filters1_3, stride1, name='conv1_3')
+    # output size
+    pool1_3 = max_pool(conv1_3, ksize=2, stride=1, name='pool1_3')
+    # conv1-1 pool 1-1
+    # output size
+    conv1_4 = conv_layer(x, filter_size1_4, num_filters1_4, stride1, name='conv1_4')
+    # output size
+    pool1_4 = max_pool(conv1_4, ksize=2, stride=1, name='pool1_4')
+    pool1 = tf.concat([pool1_1, pool1_2, pool1_3, pool1_4], 1)
     # conv2 = conv_layer(pool1, filter_size2, num_filters2, stride2, name='conv2')
     # pool2 = max_pool(conv2, ksize=2, stride=2, name='pool2')
     layer_flat = flatten_layer(pool1)

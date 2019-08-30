@@ -21,15 +21,15 @@ elif (sys.argv[1] == 'train'):
 
 bg = 7 # bandgap
 prop = 'PSV_bg' # choose the bandgap type
-t = 4 # times
-img_h = img_w = 10 * t  # images are 10x10
-img_size_flat = img_h * img_w  # 10x10=100, the total number of pixels
+t = 2 # times
+img_h = img_w = 10 * t  # images are 20x20
+img_size_flat = img_h * img_w  # 20x20=400, the total number of pixels
 n_classes = 2  # Number of classes
 n_channels = 1
 
 # Load MNIST data
 x_train, y_train, x_valid, y_valid = load_data(
-    mode='train', times = t, prop = prop, bg = bg)
+    raw = 'data_original.mat', wanted = 'data_original.mat', mode='train', balance='on', times = 2)
 print("Size of:")
 # print(y_train)
 print("- Training-set:\t\t{}".format(len(y_train)))
@@ -37,39 +37,40 @@ print("- Validation-set:\t{}".format(len(y_valid)))
 
 # Hyper-parameters
 logs_path = "./logs"  # path to the folder that we want to save the logs for Tensorboard
-lr = 0.001  # The optimization initial learning rate
-epochs = 50  # Total number of training epochs
+lr = 0.0015  # The optimization initial learning rate
+epochs = 25  # Total number of training epochs
 batch_size = 10 # Training batch size
 display_freq = 500  # Frequency of displaying the training results
 
 # 1st convolutional layer
+filter_size = 10
+num_filters = 8
 stride1 = 1  # The stride of the sliding window
 
 # conv1-1 size 8
-filter_size1_1 = 8  # Convolution filters are 2 x 2 pixels, smaller fig
-num_filters1_1 = 2  # There are 10 of these filters.
+# filter_size1_1 = 8  # Convolution filters are 2 x 2 pixels, smaller fig
+# num_filters1_1 = 2  # There are 10 of these filters.
 
-# conv1-1 size 6
-filter_size1_2 = 6  # Convolution filters are 2 x 2 pixels, smaller fig
-num_filters1_2 = 2  # There are 10 of these filters.
+# # conv1-1 size 6
+# filter_size1_2 = 6  # Convolution filters are 2 x 2 pixels, smaller fig
+# num_filters1_2 = 2  # There are 10 of these filters.
 
-# conv1-1 size 4
-filter_size1_3 = 4  # Convolution filters are 2 x 2 pixels, smaller fig
-num_filters1_3 = 2  # There are 10 of these filters.
+# # conv1-1 size 4
+# filter_size1_3 = 4  # Convolution filters are 2 x 2 pixels, smaller fig
+# num_filters1_3 = 2  # There are 10 of these filters.
 
-# conv1-1 size 2
-filter_size1_4 = 2  # Convolution filters are 2 x 2 pixels, smaller fig
-num_filters1_4 = 2  # There are 10 of these filters.
+# # conv1-1 size 2
+# filter_size1_4 = 2  # Convolution filters are 2 x 2 pixels, smaller fig
+# num_filters1_4 = 2  # There are 10 of these filters.
 
-# 2nd Convolutional Layer
-filter_size2 = 8  # Convolution filters are 2 x 2 pixels.
-num_filters2 = 8  # There are 20 of these filters.
-stride2 = 1  # The stride of the sliding window
+# # 2nd Convolutional Layer
+# filter_size2 = 8  # Convolution filters are 2 x 2 pixels.
+# num_filters2 = 8  # There are 20 of these filters.
+# stride2 = 1  # The stride of the sliding window
 
 # Fully-connected layer.
 # h1 = 128  # Number of neurons in fully-connected layer.
-h1 = 16  # Number of neurons in fully-connected layer = 64
-h2 = 1
+h1 = 1  # Number of neurons in fully-connected layer
 
 # Create the network graph
 # Placeholders for inputs (x), outputs(y)
@@ -85,12 +86,12 @@ with tf.name_scope('Input'):
 # # -----------------------------original version
 # conv1-1 pool 1-1
 # output size 
-conv1_1 = conv_layer(x, filter_size1_1, num_filters1_1, stride1, name='conv1_1')
-# output size 
-pool1_1 = max_pool(conv1_1, ksize=2, stride=1, name='pool1_1')
+# conv1_1 = conv_layer(x, filter_size1_1, num_filters1_1, stride1, name='conv1_1')
+# # output size 
+# pool1_1 = max_pool(conv1_1, ksize=2, stride=1, name='pool1_1')
 
-# conv1-1 pool 1-2
-# output size 
+# # conv1-1 pool 1-2
+# # output size 
 # conv1_2 = conv_layer(x, filter_size1_2, num_filters1_2, stride1, name='conv1_2')
 # # output size 
 # pool1_2 = max_pool(conv1_2, ksize=2, stride=1, name='pool1_2')
@@ -108,15 +109,22 @@ pool1_1 = max_pool(conv1_1, ksize=2, stride=1, name='pool1_1')
 # pool1_4 = max_pool(conv1_4, ksize=2, stride=1, name='pool1_4')
 
 
-pool1 = pool1_1#tf.concat([pool1_2, pool1_3, pool1_4], 1)
+# pool1 = tf.concat([pool1_1, pool1_2, pool1_3, pool1_4], 1)
 
 # conv2 = conv_layer(pool1, filter_size2, num_filters2, stride2, name='conv2')
 # pool2 = max_pool(conv2, ksize=2, stride=2, name='pool2')
 
+# Define network
+# Hidden layer
+
+conv1 = conv_layer(x, filter_size, num_filters, stride1, name='conv1')
+# global average pooling
+pool1 = tf.nn.avg_pool(conv1, ksize=[1, 11, 11, 1], strides=[1, 1, 1, 1], padding='SAME')
+# pool1 = tf.reduce_mean(pool1, axis=[1, 2])
+
 layer_flat = flatten_layer(pool1)
-fc1 = fc_layer(layer_flat, h1, 'FC1', use_relu=False)
-fc2 = fc_layer(fc1, h2, 'FC2', use_relu=False)
-output_logits = fc_layer(fc2, n_classes, 'OUT', use_relu=False)
+fc = fc_layer(layer_flat, h1, 'FC2', use_relu=False)
+output_logits = fc_layer(fc, n_classes, 'OUT', use_relu=False)
 
 
 # Define the loss function, optimizer, and accuracy
@@ -153,7 +161,7 @@ saver = tf.train.Saver()
 # Specify desired features
 # f = [tf.shape(conv1_1),tf.shape(conv1_2), tf.shape(conv1_3), tf.shape(conv1_4), tf.shape(pool1_1),tf.shape(pool1_2), tf.shape(pool1_3), tf.shape(pool1_4), tf.shape(pool12), tf.shape(pool123), tf.shape(pool1), tf.shape(conv2), tf.shape(pool2), tf.shape(layer_flat), tf.shape(fc1), tf.shape(fc2), tf.shape(output_logits)]
 f = [pool1]
-desired_features = [correct_prediction, y, fc2]
+desired_features = [correct_prediction, y, fc]
 
 # # Specify which ckpt to use
 # ckpt_path = saver.save(sess, "{}/model.epoch{}.ckpt".format(logs_path, epochs-1))
@@ -276,7 +284,7 @@ if trainFlag:
     with tf.Session() as sess:
         saver.restore(sess, "{}/{}.bg{}.model.epoch{}.ckpt".format(logs_path, prop, bg, epochs - 1))
         # Test the network when training is done
-        x_test, y_test = load_data(mode='test', times=t, prop = prop, bg = bg)
+        x_test, y_test = load_data(raw = 'data_original.mat', wanted = 'data_original.mat', mode='test', balance='on', times = 2)
         feed_dict_test = {x: x_test, y: y_test}
         loss_test, acc_test = sess.run([loss, accuracy], feed_dict=feed_dict_test)
         print('---------------------------------------------------------')
@@ -292,7 +300,7 @@ if not os.path.isdir(csv_output_path):
 with tf.Session() as sess:
     saver.restore(sess, "{}/{}.bg{}.model.epoch{}.ckpt".format(logs_path, prop, bg, epochs-1))
     # Test the network when training is done
-    x_wanted, y_wanted = load_data(mode='wanted', times=t, prop = prop, bg = bg)
+    x_wanted, y_wanted = load_data(raw = 'data_original.mat', wanted = 'data_original.mat', mode='wanted', balance='on', times = 2)
     feed_dict_wanted = {x: x_wanted, y: y_wanted}
     loss_wanted, acc_wanted, features_np = sess.run([loss, accuracy, desired_features], feed_dict=feed_dict_wanted)
     print('---------------------------------------------------------')
