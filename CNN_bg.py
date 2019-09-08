@@ -38,7 +38,7 @@ print("- Validation-set:\t{}".format(len(y_valid)))
 # Hyper-parameters
 logs_path = "./logs"  # path to the folder that we want to save the logs for Tensorboard
 lr = 0.001  # The optimization initial learning rate
-epochs = 50  # Total number of training epochs
+epochs = 35  # Total number of training epochs
 batch_size = 10 # Training batch size
 display_freq = 500  # Frequency of displaying the training results
 

@@ -1,3 +1,5 @@
+########## balance after train test split FIXED on 0908
+
 import numpy as np
 import random
 import scipy
@@ -117,12 +119,14 @@ def load_data(raw = 'data_original.mat', wanted = 'data_original.mat', mode='tra
     y_raw = prepare_label(rawdata, prop = prop, bg = bg)# 1*16 one-hot bg class
     # print(y_raw)
     # balance the open and close cases
+    x_train_data, x_test_data, y_train_data, y_test_data = train_test_split(X_raw, y_raw, test_size=0.2, random_state=42)
+
     if balance == 'on':
-        y_true_index = np.where(y_raw[:,0] == 1)[0]
+        y_true_index = np.where(y_train_data[:,0] == 1)[0]
         # print(y_true_index.shape)
         y_true_num = y_true_index.shape[0]
         # print("y_true_num: %d" %(y_true_num))
-        y_false_num = y_raw.shape[0] - y_true_num
+        y_false_num = y_train_data.shape[0] - y_true_num
         # print("y_false_num: %d" %(y_false_num))
         y_insert_num = int(0.2*(y_false_num - y_true_num))
         # y_insert_num = 1
@@ -130,25 +134,62 @@ def load_data(raw = 'data_original.mat', wanted = 'data_original.mat', mode='tra
         np.random.seed(6) # set random seed for np
         y_insert_index = np.random.choice(y_true_index, y_insert_num)
         # print("y_insert_index: " + str(y_insert_index))
-        y_insert = y_raw[y_insert_index, :]
+        y_insert = y_train_data[y_insert_index, :]
         # print("y_insert: " + str(y_insert))
         # print("y_insert.shape: " + str(y_insert.shape))
         # print("y_raw.shape: " + str(y_raw.shape))
-        y_raw_new = np.append(y_raw, y_insert, axis = 0)
+        y_raw_new = np.append(y_train_data, y_insert, axis = 0)
         # print("y_raw_new.shape: " + str(y_raw_new.shape))
         # print("y_raw_new: " + str(y_raw_new))
-        x_insert = X_raw[y_insert_index, :]
+        x_insert = x_train_data[y_insert_index, :]
         # print("x_insert: " + str(x_insert))
         # print("x_insert.shape: " + str(x_insert.shape))
         # print("x_raw.shape: " + str(X_raw.shape))
-        x_raw_new = np.append(X_raw, x_insert, axis = 0)
+        x_raw_new = np.append(x_train_data, x_insert, axis = 0)
         # print("x_raw_new.shape: " + str(x_raw_new.shape))
         # print("x_raw_new: " + str(x_raw_new))
         # replace the old X_raw and y_raw
-        X_raw = x_raw_new
-        y_raw = y_raw_new
+        x_train_data = x_raw_new
+        y_train_data = y_raw_new
+
+        ## for test data
+        y_true_index_t = np.where(y_test_data[:,0] == 1)[0]
+        # print(y_true_index.shape)
+        y_true_num_t = y_true_index_t.shape[0]
+        # print("y_true_num: %d" %(y_true_num))
+        y_false_num_t = y_test_data.shape[0] - y_true_num_t
+        # print("y_false_num: %d" %(y_false_num))
+        y_insert_num_t = int(0.2*(y_false_num_t - y_true_num_t))
+        # y_insert_num = 1
+        # print("y_insert_num: %d" %(y_insert_num))
+        np.random.seed(6) # set random seed for np
+        y_insert_index_t = np.random.choice(y_true_index_t, y_insert_num_t)
+        # print("y_insert_index: " + str(y_insert_index))
+        y_insert_t = y_test_data[y_insert_index_t, :]
+        # print("y_insert: " + str(y_insert))
+        # print("y_insert.shape: " + str(y_insert.shape))
+        # print("y_raw.shape: " + str(y_raw.shape))
+        y_test_new = np.append(y_test_data, y_insert_t, axis = 0)
+        # print("y_raw_new.shape: " + str(y_raw_new.shape))
+        # print("y_raw_new: " + str(y_raw_new))
+        x_insert_t = x_test_data[y_insert_index_t, :]
+        # print("x_insert: " + str(x_insert))
+        # print("x_insert.shape: " + str(x_insert.shape))
+        # print("x_raw.shape: " + str(X_raw.shape))
+        x_test_new = np.append(x_test_data, x_insert_t, axis = 0)
+        # print("x_raw_new.shape: " + str(x_raw_new.shape))
+        # print("x_raw_new: " + str(x_raw_new))
+        # replace the old X_raw and y_raw
+        x_test_data = x_test_new
+        y_test_data = y_test_new
     # x_short_data, x_shooort_data, y_short_data, y_shooort_data = train_test_split(X_raw, y_raw, test_size=0.2, random_state=42)
-    x_train_data, x_test_data, y_train_data, y_test_data = train_test_split(X_raw, y_raw, test_size=0.2, random_state=42)
+    # x_train_data, x_test_data, y_train_data, y_test_data = train_test_split(X_raw, y_raw, test_size=0.2, random_state=42)
+    
+    # for i in range(0, len(y_test_data)):
+    #     print(np.where(y_raw[:,0] == 1)[0])
+    #     if np.where(y_raw[:,0] == 1)[0] == True:
+    #         count += 1
+    # print(count)
     # x_train_data = X_raw
     # y_train_data = y_raw
     # x_test_data = X_raw[0:4]
@@ -172,8 +213,8 @@ def load_data(raw = 'data_original.mat', wanted = 'data_original.mat', mode='tra
         # print("y_valid: " + str(y_valid))
         x_train, _ = reformat(x_train, y_train)
         x_valid, _ = reformat(x_valid, y_valid)
-        print("x_train after reformat: " + str(x_train))
-        print("x_valid after reformat: " + str(x_valid))
+        # print("x_train after reformat: " + str(x_train))
+        # print("x_valid after reformat: " + str(x_valid))
         return x_train, y_train, x_valid, y_valid
     elif mode == 'test':
         x_test, _ = reformat(x_test_data, y_test_data)
